@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Questionaire</title>
+	<style type="text/css">
+		body, html{
+			margin: 0;
+			padding: 0;
+			height: 100%;
+		}
+
+		* {
+			font-family: sans-serif;
+		}
+
+		.container {
+			position: relative;
+			min-height: 100%;
+			position: relative;
+			background: rgb(87,20,212);
+			background: radial-gradient(circle, rgba(87,20,212,1) 0%, rgba(19,22,55,1) 82%);
+			color: #EBECF0;
+		}
+
+		.menuStart {
+			position: absolute;
+			width: 70%;
+			height: 80%;
+			z-index: 100;
+			top: 10%;
+			left: 15%;
+			border-radius: 5px;
+			box-shadow: 0px 2px 400px 200px rgba(0,0,0,0.71);
+			-webkit-box-shadow: 0px 2px 400px 200px rgba(0,0,0,0.71);
+			-moz-box-shadow: 0px 2px 400px 200px rgba(0,0,0,0.71);
+		}
+
+		.menuStart h2 {
+			font-family: cursive;
+			text-shadow: -2px 2px 1px rgba(0, 0, 0, 0.3);
+			padding: 0 100px;
+   		 	text-align: justify;
+   		 	text-align: center;
+		}
+
+		.menuBg {
+			background: lightblue url("pics/bg.jpg") no-repeat fixed center;
+			background-size: cover;
+			position: absolute;
+			top: 0;
+			left: 0;
+			height: 100%;
+			width: 100%;
+			z-index: -999;
+			filter: blur(3px);
+  			-webkit-filter: blur(3px);
+		}
+
+		.menuBody {
+			padding: 20px;
+		}
+
+		.menuButton {
+			text-align: center;
+			background-color: #333;
+			display: inline-block;
+			padding: 10px 50px;
+			font-size: 25px;
+			border-radius: 10px;
+			cursor: pointer;
+		}
+
+		.menuButton:hover {
+			background-color: rgb(87,20,212);
+		}
+
+		.header {
+			width: 80%;
+			padding: 10px 10px 10px 15px;
+		}
+
+		.header .q {
+			margin-right: 10px;
+		}
+
+		.header span {
+			font-weight: 600;
+			color: lightgrey;
+		}
+
+		.timer {
+		    font-size: 30vh;
+		    padding: 0;
+		    margin: 0;
+		    text-align: center;
+		}
+
+		#question {
+			margin-top: 45px;
+		    padding: 10px;
+		    text-align: center;
+		    font-size: 20px;
+		    font-weight: 600;
+		}
+
+		.answers {
+			width: 100%;
+			display: flex;
+			flex-wrap: wrap;
+			gap: 12px;
+			justify-content: center;
+		    position: absolute;
+		    bottom: 50px;
+		}
+
+		.answers > div {
+		    padding: 15px;
+		    border-radius: 5px;
+		    width: 45%;
+		    background: linear-gradient(0deg, rgba(26,6,111,1) 2%, rgba(40,113,204,0.9486169467787114) 69%, rgba(40,113,204,1) 100%);
+			cursor: pointer;
+		}
+
+		.answers > div:hover {
+			background: rgb(87,20,212);
+			transition: background-color 300ms linear;
+		}
+
+		.answers .letter {
+			font-weight: 600;
+		}
+
+		#win {
+			width: 100%;
+			height: 100%;
+			background: red;
+			position: absolute;
+			left: 0;
+			top: 0;
+			z-index: 1000000;
+			background: lightblue url("pics/win.jpg") no-repeat fixed center;
+			background-size: cover;
+			display: none;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		
+		<div id="win"></div>
+
+		<div id="menuBody" class="menuStart">
+			<div id="menuBg" class="menuBg"></div>
+			<div class="menuBody">			
+				<h2 id="textMenu">Hello and welcome to my game. Do you have what it takes to challenge the dungeon of wits, answer all ten questions correctly and you may win a prize from <span style="color: red;">Guam</span>. Are you up to the challenge, or are you scared?
+				</h2>
+
+				<h2 id="finalScore"></h2>
+				<center><div id="buttonStart"><p class="menuButton">Challenge</p></div></center>
+			</div>
+		</div>
+
+		<div class="header">
+			<p><span class="q">Question <span id="q">1</span></span> <span>Score: </span><span id="score">0</span>/10</p>
+		</div>
+
+		<div class="timer">
+			<p id="timer" class="timer">50</p>
+		</div>
+
+		<div id="question">
+			<p>Who is the best starter Pokemon?</p>
+		</div>
+		
+		<div class="answers">
+			<div id="a"><span class="letter">A:</span> <span id="optionA"> </span></div>
+			<div id="b"><span class="letter">B:</span> <span id="optionB"> </span></div>
+			<div id="c"><span class="letter">C:</span> <span id="optionC"> </span></div>
+			<div id="d"><span class="letter">D:</span> <span id="optionD"> </span></div>
+		</div>
+	
+		<!-- sounds start -->
+		<audio id="lose1">
+			<source src="sounds/laugh1.mp3" type="audio/mpeg">
+		</audio>
+		<audio id="lose2">
+			<source src="sounds/laugh2.mp3" type="audio/mpeg">
+		</audio>
+		<audio id="lose3">
+			<source src="sounds/laugh3.mp3" type="audio/mpeg">
+		</audio>
+		<audio id="winSounds">
+			<source src="sounds/win.mp3" type="audio/mpeg">
+		</audio>
+		<!-- sounds end -->
+
+	</div>
+
+	<script type="text/javascript">
+		const menuBody = document.getElementById("menuBody");
+		const menuBg = document.getElementById("menuBg");
+		const buttonStart = document.getElementById("buttonStart");
+		const textTimer = document.getElementById("timer");
+		const textQuestion = document.getElementById("question");
+		const textA = document.getElementById("optionA");
+		const textB = document.getElementById("optionB");
+		const textC = document.getElementById("optionC");
+		const textD = document.getElementById("optionD");
+		const textScore = document.getElementById("score");
+		const textQ = document.getElementById("q");
+		const textMenu = document.getElementById("textMenu");
+		const finalScore = document.getElementById("finalScore");
+		const winBg = document.getElementById("win");
+		// sounds
+		const lose1 = document.getElementById("lose1"); 
+		const lose2 = document.getElementById("lose2"); 
+		const lose3 = document.getElementById("lose3"); 
+		const winSounds = document.getElementById("winSounds"); 
+
+		let textLose = "";
+
+		let startGame = 0;
+		let score = 0;
+		let index = 0;
+		let timer = 50;
+		
+		let x;
+
+		const questions = [
+			['What type of lion never roars?',
+			'A dandelion','A captured lion','A lion cub','A mountain lion', 'A dandelion'],
+
+			['What can you catch but cannot throw?',
+			'A cold','A tennis ball','Your toys','A boomerang', 'A cold'],
+
+			["Pick me up and scratch my head. I’ll turn red and then black. What am I?",
+			'Candle','None of the above','A match','Caterpillar', 'A match'],
+
+			["I can be broken without being touched or even being seen. What am I?",
+			'A promise','Glass','Window','Ice', 'A promise'],
+
+			["I have a neck, but I don’t have a head, and I wear a cap. What am I?",
+			'A ghost','A bottle','A snake','A clam', 'A bottle'],
+
+			["If you have it, you want to share it. If you share it, you don’t have it anymore. What is it?",
+			'Love','A secret','Talent','None of the above', 'A secret'],
+
+			["Cut me and I won’t cry, but you will. What am I?",
+			'Spearmint','Slug','A knife','Onion', 'Onion'],
+
+			["What runs around a house but does not move?",
+			'A dog','An alarm','A garden gnome','A fence', 'A fence'],
+
+			["What tree do we all carry in our hands?",
+			'Cedar','Oak','Eucalyptus','Palm', 'Palm'],
+
+			["Of the options below, what has four legs, one head and one foot?",
+			'An Amazonian rabbit','A three-legged dog','A bed','A chair', 'A bed'],
+
+			["What is always coming but never arrives?",
+			'Tomorrow','A train','Your paycheck','The mail', 'Tomorrow'],
+
+			["The person who made it doesn’t want it, the person who paid for it doesn’t need it, and the person who needs it doesn’t know it. What is it?",
+			'A cake','A car','A meal','A coffin', 'A coffin'],
+
+			["I can’t be seen, but I can be heard. I won’t answer until spoken to. What am I?",
+			'A dream','Echo','Children','A voice', 'Echo'],
+
+			["What has 13 hearts, but no other organ?",
+			'A deck of cards','A soccer team','A science lab','An operating theatre', 'A deck of cards'],
+
+			["What has branches, but no bark?",
+			'A dog pound','A library','A car','A forest', 'A library'],
+
+			["Everybody has me but I’m impossible to lose. What am I?",
+			'Shadow','Money','Hair','Skin', 'Shadow'],
+		];
+
+		
+		let shuffledQuestions;
+
+		function start() {
+			if (lose1.duration > 0 && !lose1.paused) {
+				lose1.pause();
+				lose1.currentTime = 0
+			}
+			if (lose2.duration > 0 && !lose2.paused) {
+				lose2.pause();
+				lose2.currentTime = 0
+			}
+			if (lose3.duration > 0 && !lose3.paused) {
+				lose3.pause();
+				lose3.currentTime = 0
+			}
+
+			startGame = 1;
+			shuffledQuestions = '';
+			textQ.innerText = (index + 1);
+			shuffledQuestions = shuffleArray(questions);
+			startTimer()
+			setQuestionaire()
+		}
+
+		function setQuestionaire() {
+			textQuestion.innerHTML = shuffledQuestions[index][0];
+			const getQuestion = [
+				shuffledQuestions[index][1],
+				shuffledQuestions[index][2],
+				shuffledQuestions[index][3],
+				shuffledQuestions[index][4],
+			]
+			const answer = shuffledQuestions[index][5];
+			console.log(answer);
+			const randomizeQuestion = shuffleArray(getQuestion);
+
+			textA.innerHTML = randomizeQuestion[0];
+			textB.innerHTML = randomizeQuestion[1];
+			textC.innerHTML = randomizeQuestion[2];
+			textD.innerHTML = randomizeQuestion[3];
+		}
+
+		function buttonEvents() {
+			const buttonA = document.getElementById("a");
+			const buttonB = document.getElementById("b");
+			const buttonC = document.getElementById("c");
+			const buttonD = document.getElementById("d");
+
+			buttonA.addEventListener('click', event => {
+				if(startGame == 1){
+					let getText = getElementText(buttonA);
+					isRightAnswer(getText);
+				}
+			});
+			buttonB.addEventListener('click', event => {
+				if(startGame == 1){
+					let getText = getElementText(buttonB);
+					isRightAnswer(getText);
+				}
+			});
+
+			buttonC.addEventListener('click', event => {
+				if(startGame == 1){
+					let getText = getElementText(buttonC);
+					isRightAnswer(getText);
+				}
+			});
+
+			buttonD.addEventListener('click', event => {
+				if(startGame) {
+					let getText = getElementText(buttonD);
+					isRightAnswer(getText);
+				}
+			});
+
+			function getElementText(element) {
+				let getText = element.innerText.substring(2).trim();
+				return getText;
+			}
+
+		}
+
+		function isRightAnswer(answer) {
+			let correctAnswer = shuffledQuestions[index][5];
+
+			if(correctAnswer === answer) {
+				score++;
+				index++;
+				textScore.innerText = score;
+				textQ.innerText = (index + 1);
+				setQuestionaire()
+				resetTimer()
+			}else {
+				lose()
+			}
+
+			if(score == 10) {
+				win()
+			}
+		}
+
+		function shuffleArray(array) {
+			return array.sort((a, b) => 0.5 - Math.random());
+		}
+
+		function resetTimer() {
+			timer = 50;
+			textTimer.innerHTML = timer;
+		}
+
+		function startTimer() {
+			x = setInterval(function() {
+				if(timer > -1) {
+					textTimer.innerHTML = timer;
+					timer--;
+				}else {
+					lose()
+				}
+			}, 1000);
+		}
+
+		function lose() {
+			setLosingText(score) 
+			sounds(score)
+
+			timer = 50;
+			textTimer.innerHTML = timer;
+			startGame = 0;
+			score = 0;
+			index = 0;
+			menuBody.style.display = "block";
+			textQ.innerText = 0;
+			textScore.innerText = 0;
+			clearInterval(x);
+
+		}
+
+		function sounds(score) {
+			randomSound = Math.floor(Math.random() * (3 - 1 + 1) + 1)
+			console.log(randomSound)
+			if(randomSound == 1) {
+				lose1.play()
+			}else if(randomSound == 2) {
+				lose2.play()
+			}else {
+				lose3.play()
+			}
+		}
+
+		let y = '';
+		let yCount = 0;
+
+		function win() {
+			console.log(winSounds)
+			winSounds.play()
+			winBg.style.display = "block";
+
+			yCount = 0;
+			y = setInterval(function() {
+				yCount++;
+					console.log(yCount)
+				if(yCount == 6) {
+					console.log('true')
+					alert("Congratulations you won the game! screenshot this and send it to Roger to claim your prize.");
+				}	
+			}, 1000);
+
+		}
+
+		function setLosingText(score) {
+			if(score < 2 ) {
+				textMenu.innerText = "Have you heard? I heard they're opening enrollments for kindergarten. I think you should go there."
+			}
+			if(score >= 2 && score <= 3 ) {
+				textMenu.innerText = 'a monkey can get a better score'
+			}
+			if(score >= 4 && score <= 6) {
+				textMenu.innerText = 'congrats you have an IQ of a toddler'
+			}
+			if(score >= 7 && score <= 8) {
+				textMenu.innerText = "You got so high and yet so far, but in the end it doesn't even matter";
+			}
+			if(score == 9) {
+				textMenu.innerText = "ohh so close, 1 more and you could had win a grand prize, better luck next time buckaroo"
+			}
+			finalScore.innerText = score + '/10'
+			
+			randomBg = randomSound = Math.floor(Math.random() * (4 - 1 + 1) + 1)
+
+			menuBg.style.background = "#f3f3f3 url('pics/lose"+randomBg+".jpg') no-repeat center";
+			menuBg.style.filter = "blur(0)"
+			menuBg.style.backgroundSize  = "cover";
+		}
+
+		buttonEvents()
+		buttonStart.addEventListener('click', event => {
+			menuBody.style.display = "none";
+			start();
+			console.log('start');
+		});
+
+	</script>
+</body>
+</html>
